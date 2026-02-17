@@ -44,9 +44,6 @@ class NumericProcessor(DataProcessor):
                 )
         except TypeError as e:
             return (e)
-        except Exception as e:
-            print(e)
-            return ("Processing Failed")
 
     def format_output(self, result: str) -> str:
         return (super().format_output(result))
@@ -72,8 +69,6 @@ class TextProcessor(DataProcessor):
                 f"Processed text: {self.length} characters, {self.words} words"
                 )
         except TypeError as e:
-            return (e)
-        except Exception as e:
             return (e)
 
     def format_output(self, result: str) -> str:
