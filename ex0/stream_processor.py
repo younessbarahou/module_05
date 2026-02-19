@@ -46,7 +46,7 @@ class NumericProcessor(DataProcessor):
             return (e)
 
     def format_output(self, result: str) -> str:
-        return (super().format_output(result))
+        return super().format_output(result)
 
 
 class TextProcessor(DataProcessor):
