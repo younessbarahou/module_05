@@ -71,7 +71,7 @@ class StreamAdapter(ProcessingPipeline):
 
 
 class NexusManager():
-    def __init__(self, pipelines:):
+    def __init__(self, pipelines: Union[JSONAdapter, CSVAdapter, StreamAdapter]):
         print("Pipeline capacity: 1000 streams/second")
         print("Creating Data Processing Pipeline...")
         print("Stage 1: Input Validation and parsing")
@@ -80,7 +80,7 @@ class NexusManager():
         self.pipelines = []
 
     def add_pipeline(self, pipeline: ProcessingPipeline) -> None:
-        self.pipelines.append(pipeline)
+        return 
 
     def process_data():
         pass
