@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Protocol, Any, Dict
+from typing import Protocol, Any, Dict, Union
 
 
 class ProcessingStage(Protocol):
@@ -71,7 +71,7 @@ class StreamAdapter(ProcessingPipeline):
 
 
 class NexusManager():
-    def __init__(self, pipelines: Union[JSONAdapter, CSVAdapter, StreamAdapter]):
+    def __init__(self) -> None:
         print("Pipeline capacity: 1000 streams/second")
         print("Creating Data Processing Pipeline...")
         print("Stage 1: Input Validation and parsing")
@@ -80,10 +80,13 @@ class NexusManager():
         self.pipelines = []
 
     def add_pipeline(self, pipeline: ProcessingPipeline) -> None:
-        return 
+        if isinstance(pipeline, ProcessingPipeline):
+            self.pipelines.append(pipeline)
+        else:
+            raise TypeError("PipeLine is invalid!")
 
-    def process_data():
-        pass
+    def process_data(self, data: Any) -> None:
+        
 
 
 if __name__ == "__main__":

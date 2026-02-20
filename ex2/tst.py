@@ -1,7 +1,7 @@
 from typing import Protocol
 
 
-class Hi(Protocol):
+class Hi():
     def hello():
         return "HI"
 
@@ -9,3 +9,5 @@ class Hi(Protocol):
 class By():
     def hi():
         return "By"
+
+a = Hi()
