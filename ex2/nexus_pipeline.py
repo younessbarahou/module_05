@@ -30,38 +30,27 @@ class InputStage():
 
 class TransformStage():
     def process(self, data: Any) -> Dict:
-        try:
-            if 'csv' in data:
-                data = data.split(',')
-                print("Transform: Parsed and structured data")
-                return (data)
-            elif 'msg' in data:
-                print("Transform: Aggregated and filtered")
-                return (data)
-            else:
-                if len(data) == 3 and 'sensor' in data and 'value' in data and 'unit' in data:
-                    if data['value'] > 25:
-                        data.update({'range': 'High range'})
-                    if data['value'] == 25:
-                        data.update({'range': 'Normal range'})
-                    if data['value'] < 25:
-                        data.update({'range': 'Low range'})
-                    print("Transform: Enriched with metadata and validation")
-                    return (data)
-                else:
-                    raise ValueError(
-                        "Error detected in Stage 2: Invalid data format")
-        except ValueError as e:
-            print(e)
-
-
-class OutputStage():
-    def process(self, data: Any) -> str:
         if 'csv' in data:
+            action_cte = 0
             data = data.split(',')
+            if len(data) == 0:
+                raise ValueError("Error detected in Stage 2: Data is empty!")
+            for d in data:
+                if d == 'action':
+                    action_cte += 1
+            data = {'action': action_cte, 'data': data}
             print("Transform: Parsed and structured data")
             return (data)
         elif 'msg' in data:
+            data['data'] = [d for d in data['data'] if d >= 15]
+            data_length = len(data['data'])
+            if data_length == 0:
+                raise ValueError("Error detected in Stage 2: Data is empty!")
+            for d in data['data']:
+                if type(d) is not float and type(d) is not int:
+                    raise TypeError("Error detected in Stage 2: Invalid Data format")
+            data_sum = sum(data['data'])
+            data.update({'len': data_length, 'avg': data_sum / data_length})
             print("Transform: Aggregated and filtered")
             return (data)
         else:
@@ -77,6 +66,16 @@ class OutputStage():
             else:
                 raise ValueError(
                     "Error detected in Stage 2: Invalid data format")
+
+
+class OutputStage():
+    def process(self, data: Any) -> str:
+        if 'action' in data:
+            return f"Output: User activity logged: {data['action']} actions processed"
+        elif 'len' in data:
+            return f"Output: Stream summary:{data['len']} readings, avg: {data['avg']}C"
+        else:
+            return f"Ouput: Processed temperature reading: {data['value']}{data['unit']} ({data['range']})"
 
 
 class ProcessingPipeline(ABC):
@@ -108,13 +107,9 @@ class JSONAdapter(ProcessingPipeline):
 
 class CSVAdapter(ProcessingPipeline):
     def process(self, data: Any) -> Union[str, Any]:
-        try:
-            if type(data) is not str:
-                raise ValueError()
-            data.split(',')
-            data = ({'csv': data})
-        except (TypeError, ValueError):
-            print("Error: Data in Invalid CSV !")
+        if type(data) is not str:
+            raise ValueError()
+        data = ({'csv': data})
         if len(self.stages) == 0:
             raise ValueError("No Stages Added yet !")
         for stage in self.stages:
@@ -123,16 +118,12 @@ class CSVAdapter(ProcessingPipeline):
 
 class StreamAdapter(ProcessingPipeline):
     def process(self, data: Any) -> Union[str, Any]:
-        try:
-            if not isinstance(data, list):
-                raise TypeError("Error: Data should be a list!")
-            data = {
-                "msg": "Real-time sensor stream",
-                "length": len(data),
-                "avg": sum(data) / len(data)
-            }
-        except TypeError as e:
-            print(e)
+        if not isinstance(data, list):
+            raise TypeError("Error: Data should be a list!")
+        data = {
+            "msg": "Real-time sensor stream",
+            'data': data
+        }
         if len(self.stages) == 0:
             raise ValueError("No Stages Added yet !")
         for stage in self.stages:
